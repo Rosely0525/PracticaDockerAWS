@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Archivos - AWS S3</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            /* Fondo vibrante y colorido con degradado dinámico */
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+            color: #1f2937;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 750px;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #4f46e5;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title {
+            margin-top: 35px;
+            border-bottom: 3px solid #f3e8ff;
+            padding-bottom: 10px;
+            color: #9333ea;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #4b5563;
+            margin-bottom: 8px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 14px 16px;
+            background-color: #f9fafb;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            color: #1f2937;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            border-color: #8b5cf6;
+            background-color: #fff;
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15);
+        }
+
+        input[type="file"] {
+            background-color: #f3e8ff;
+            color: #6b21a8;
+            border: 2px dashed #c084fc;
+            padding: 12px;
+            border-radius: 12px;
+            width: 100%;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        button {
+            background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+            width: auto;
+            padding: 12px 20px;
+            font-size: 0.9rem;
+            margin-top: 30px;
+            box-shadow: 0 4px 15px rgba(244, 63, 94, 0.4);
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 6px 20px rgba(244, 63, 94, 0.6);
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: separate;
+            border-spacing: 0;
+            overflow: hidden;
+            border-radius: 12px;
+            border: 2px solid #f3e8ff;
+        }
+
+        th, td {
+            padding: 14px 16px;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background-color: #f3e8ff;
+            color: #6b21a8;
+            font-weight: 600;
+            border-bottom: 2px solid #e9d5ff;
+        }
+
+        td {
+            border-bottom: 1px solid #f3e8ff;
+            color: #4b5563;
+            background-color: #ffffff;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: #faf5ff;
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.2s;
+            box-shadow: 0 3px 10px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-download:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.5);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .error-msg {
+            color: #e11d48;
+            font-size: 0.875rem;
+            margin-top: 12px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .upload-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .upload-row input {
+            flex: 1;
+        }
+
+        .upload-row button {
+            width: auto;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- SECCIÓN DE LOGIN -->
+        <div id="loginSection">
+            <h2>¡Bienvenido, Inicia Sesión!</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Usuario:</label>
+                    <input type="text" id="username" placeholder="Ingresa tu usuario" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Contraseña:</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit">Ingresar al Sistema</button>
+                <p id="loginError" class="error-msg"></p>
+            </form>
+        </div>
+
+        <!-- SECCIÓN DE S3 (Oculta por defecto) -->
+        <div id="appSection" class="hidden">
+            <h2>☁️ Panel de Archivos AWS S3</h2>
+            <form id="uploadForm">
+                <div class="upload-row">
+                    <input type="file" id="archivoInput" required>
+                    <button type="submit">Subir Archivo</button>
+                </div>
+            </form>
+
+            <h2 class="section-title">📂 Archivos Disponibles</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre del Archivo</th>
+                        <th>Tamaño (Bytes)</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="fileList"></tbody>
+            </table>
+            
+            <button onclick="logout()" class="btn-danger">Cerrar Sesión</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+
+            try {
+                const res = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: user, password: pass })
+                });
+
+                if (res.ok) {
+                    document.getElementById('loginSection').classList.add('hidden');
+                    document.getElementById('appSection').classList.remove('hidden');
+                    loadFiles();
+                } else {
+                    document.getElementById('loginError').textContent = '⚠️ Usuario o contraseña incorrectos.';
+                }
+            } catch (err) {
+                console.error('Error en el login:', err);
+                document.getElementById('loginError').textContent = '⚠️ Error de conexión con el servidor.';
+            }
+        });
+
+        function logout() {
+            document.getElementById('appSection').classList.add('hidden');
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('loginError').textContent = '';
+        }
+
+        async function loadFiles() {
+            try {
+                const res = await fetch('/files');
+                const files = await res.json();
+                const tbody = document.getElementById('fileList');
+                tbody.innerHTML = '';
+                
+                if (files.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #9ca3af;">No hay archivos en el bucket.</td></tr>`;
+                    return;
+                }
+
+                files.forEach(file => {
+                    tbody.innerHTML += `<tr>
+                        <td style="font-weight: 600; color: #374151;">${file.name}</td>
+                        <td>${file.size.toLocaleString()}</td>
+                        <td><a href="/download/${encodeURIComponent(file.name)}" class="btn-download" target="_blank">Descargar</a></td>
+                    </tr>`;
+                });
+            } catch (err) {
+                console.error('Error al cargar archivos:', err);
+            }
+        }
+
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fileInput = document.getElementById('archivoInput');
+            const formData = new FormData();
+            formData.append('archivo', fileInput.files[0]);
+
+            const res = await fetch('/upload', { method: 'POST', body: formData });
+            if (res.ok) {
+                alert('¡Archivo subido exitosamente a S3!');
+                fileInput.value = '';
+                loadFiles();
+            } else {
+                alert('Error al subir el archivo.');
+            }
+        });
+    </script>
+</body>
+</html>
