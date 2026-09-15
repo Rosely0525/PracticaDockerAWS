@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: contenedor_backend
+    ports:
+      - "5000:3000"
+    environment:
+      - AWS_REGION=us-east-2
+      - AWS_ACCESS_KEY_ID=AKIASVHHK4CL3RFSFHP
+      - AWS_SECRET_ACCESS_KEY=tQXnFRv+KB5jlaHDT7Aaf24rKBQcPlzCOd03Qcu
+      - AWS_BUCKET_NAME=docker-s3rosely # El nombre exacto de tu bucket S3
+      # - AWS_SESSION_TOKEN=tu_token       # Descomenta solo si usas token temporal
+    networks:
+      - red-s3
+
+  frontend:
+    build: ./frontend
+    container_name: contenedor_frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - red-s3
+
+networks:
+  red-s3:
+    driver: bridge

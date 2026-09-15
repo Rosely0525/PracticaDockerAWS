@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Archivos - AWS S3</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 50px; background: #f4f4f9; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); }
+        table { width: 100%; margin-top: 20px; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #007bff; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Subir Archivos a Amazon S3</h2>
+        <form id="uploadForm">
+            <input type="file" id="archivoInput" required>
+            <button type="submit">Subir a S3</button>
+        </form>
+
+        <h2>Archivos Disponibles en S3</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nombre del Archivo</th>
+                    <th>Tamaño (Bytes)</th>
+                </tr>
+            </thead>
+            <tbody id="fileList"></tbody>
+        </table>
+    </div>
+
+    <script>
+        async function loadFiles() {
+            try {
+                const res = await fetch('/files');
+                const files = await res.json();
+                const tbody = document.getElementById('fileList');
+                tbody.innerHTML = '';
+                files.forEach(file => {
+                    tbody.innerHTML += `<tr><td>${file.name}</td><td>${file.size}</td></tr>`;
+                });
+            } catch (err) {
+                console.error('Error al cargar archivos:', err);
+            }
+        }
+
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fileInput = document.getElementById('archivoInput');
+            const formData = new FormData();
+            formData.append('archivo', fileInput.files[0]);
+
+            const res = await fetch('/upload', { method: 'POST', body: formData });
+            if (res.ok) {
+                alert('¡Archivo subido exitosamente a S3!');
+                fileInput.value = '';
+                loadFiles();
+            } else {
+                alert('Error al subir el archivo.');
+            }
+        });
+
+        loadFiles();
+    </script>
+</body>
+</html>
